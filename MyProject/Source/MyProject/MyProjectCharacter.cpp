@@ -8,6 +8,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/Controller.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "MyPlayerState.h"
 
 //////////////////////////////////////////////////////////////////////////
 // AMyProjectCharacter
@@ -37,6 +38,7 @@ AMyProjectCharacter::AMyProjectCharacter()
 	CameraBoom->SetupAttachment(RootComponent);
 	CameraBoom->TargetArmLength = 300.0f; // The camera follows at this distance behind the character	
 	CameraBoom->bUsePawnControlRotation = true; // Rotate the arm based on the controller
+	CameraBoom->SocketOffset = FVector(0.f, 90.f, 60.f);
 
 	// Create a follow camera
 	FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
@@ -45,6 +47,8 @@ AMyProjectCharacter::AMyProjectCharacter()
 
 	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character) 
 	// are set in the derived blueprint asset named MyCharacter (to avoid direct content references in C++)
+
+	AttributeComp = CreateDefaultSubobject<UMyCharacterAttributeComponent>(TEXT("AttributeComp"));
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -74,6 +78,8 @@ void AMyProjectCharacter::SetupPlayerInputComponent(class UInputComponent* Playe
 
 	// VR headset functionality
 	PlayerInputComponent->BindAction("ResetVR", IE_Pressed, this, &AMyProjectCharacter::OnResetVR);
+
+	PlayerInputComponent->BindAction("Fire", IE_Pressed, this, &AMyProjectCharacter::Fire);
 }
 
 
@@ -136,5 +142,55 @@ void AMyProjectCharacter::MoveRight(float Value)
 		const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
 		// add movement in that direction
 		AddMovementInput(Direction, Value);
+	}
+}
+
+void AMyProjectCharacter::Fire()
+{
+	if (AttributeComp->GetMagicPoint() < 0.f) return;
+
+	if (ProjectileClass)
+	{
+		UWorld* World = GetWorld();
+		if (World)
+		{
+			const float LineTraceDistanceFallback = 10000.f;
+
+			FVector TraceDirection = FollowCamera->GetComponentRotation().Vector();
+			FVector TraceStart = FollowCamera->GetComponentLocation();
+			FVector TraceEnd = TraceStart + (TraceDirection * LineTraceDistanceFallback);
+
+			FCollisionQueryParams QueryParams;
+			QueryParams.AddIgnoredActor(this);
+
+			FHitResult OutHit;
+			bool isHit = World->LineTraceSingleByProfile(OutHit, TraceStart, TraceEnd, TEXT("MyProjectile"), QueryParams);
+			if (isHit) TraceEnd = OutHit.ImpactPoint;
+
+			FVector MuzzleLocation = GetMesh()->GetSocketLocation(TEXT("MySocketHandR"));
+			FRotator MuzzleRotation = (TraceEnd - MuzzleLocation).Rotation();
+
+			FActorSpawnParameters SpawnParams;
+			SpawnParams.Owner = this;
+			SpawnParams.Instigator = GetInstigator();
+			SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+
+			AMyProjectile* Projectile = World->SpawnActor<AMyProjectile>(ProjectileClass, MuzzleLocation, MuzzleRotation, SpawnParams);
+			if (Projectile)
+			{
+				// consume MP
+				AttributeComp->ApplyMagicPointChange(-AttributeComp->GetMagicPointConsumed());
+
+				// add Score
+				AMyPlayerState* PS = GetPlayerState<AMyPlayerState>();
+				if (PS)
+				{
+					PS->ApplyMyScoreChange(1);
+				}
+
+				FVector LaunchDirection = MuzzleRotation.Vector();
+				Projectile->FireInDirection(LaunchDirection);
+			}
+		}
 	}
 }

@@ -4,6 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "MyProjectile.h"
+#include "MyCharacterAttributeComponent.h"
 #include "MyProjectCharacter.generated.h"
 
 UCLASS(config=Game)
@@ -68,5 +70,16 @@ public:
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
 	/** Returns FollowCamera subobject **/
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
+
+public:
+	UFUNCTION()
+	void Fire();
+
+protected:
+	UPROPERTY(EditDefaultsOnly, Category = Projectile)
+	TSubclassOf<class AMyProjectile> ProjectileClass;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Components)
+	UMyCharacterAttributeComponent* AttributeComp;
 };
 
