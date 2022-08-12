@@ -15,3 +15,10 @@
 链接：https://pan.baidu.com/s/1PUIkOxCBxGaABM-HR9rEng 
 提取码：r0jh 
 ```
+
+1. Lesson 3 (MyProject at commit ed3e91b):
+
+```
+链接：https://pan.baidu.com/s/1KS-r24Qs6Pimyj9ByJlfFQ 
+提取码：dacp 
+```
