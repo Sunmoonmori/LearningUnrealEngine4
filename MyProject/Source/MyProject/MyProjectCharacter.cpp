@@ -49,6 +49,9 @@ AMyProjectCharacter::AMyProjectCharacter()
 	// are set in the derived blueprint asset named MyCharacter (to avoid direct content references in C++)
 
 	AttributeComp = CreateDefaultSubobject<UMyCharacterAttributeComponent>(TEXT("AttributeComp"));
+
+	CanFire = true;
+	IsFiring = false;
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -80,6 +83,7 @@ void AMyProjectCharacter::SetupPlayerInputComponent(class UInputComponent* Playe
 	PlayerInputComponent->BindAction("ResetVR", IE_Pressed, this, &AMyProjectCharacter::OnResetVR);
 
 	PlayerInputComponent->BindAction("Fire", IE_Pressed, this, &AMyProjectCharacter::Fire);
+	PlayerInputComponent->BindAction("Fire", IE_Released, this, &AMyProjectCharacter::StopFiring);
 }
 
 
@@ -145,30 +149,55 @@ void AMyProjectCharacter::MoveRight(float Value)
 	}
 }
 
+void AMyProjectCharacter::UpdateAimingTargetLocation()
+{
+	UWorld* World = GetWorld();
+	if (World)
+	{
+		const float LineTraceDistanceFallback = 10000.f;
+
+		FVector TraceDirection = FollowCamera->GetComponentRotation().Vector();
+		FVector TraceStart = FollowCamera->GetComponentLocation();
+		FVector TraceEnd = TraceStart + (TraceDirection * LineTraceDistanceFallback);
+
+		FCollisionQueryParams QueryParams;
+		QueryParams.AddIgnoredActor(this);
+
+		FHitResult OutHit;
+		bool isHit = World->LineTraceSingleByProfile(OutHit, TraceStart, TraceEnd, TEXT("MyProjectile"), QueryParams);
+		if (isHit) 
+		{
+			AimingTargetLocation = OutHit.ImpactPoint;
+		}
+		else
+		{
+			AimingTargetLocation = TraceEnd;
+		}
+	}
+}
+
+void AMyProjectCharacter::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+
+	UpdateAimingTargetLocation();
+}
+
 void AMyProjectCharacter::Fire()
 {
+	if (!CanFire || IsFiring) return;
+
 	if (AttributeComp->GetMagicPoint() < 0.f) return;
+
+	IsFiring = true;
 
 	if (ProjectileClass)
 	{
 		UWorld* World = GetWorld();
 		if (World)
 		{
-			const float LineTraceDistanceFallback = 10000.f;
-
-			FVector TraceDirection = FollowCamera->GetComponentRotation().Vector();
-			FVector TraceStart = FollowCamera->GetComponentLocation();
-			FVector TraceEnd = TraceStart + (TraceDirection * LineTraceDistanceFallback);
-
-			FCollisionQueryParams QueryParams;
-			QueryParams.AddIgnoredActor(this);
-
-			FHitResult OutHit;
-			bool isHit = World->LineTraceSingleByProfile(OutHit, TraceStart, TraceEnd, TEXT("MyProjectile"), QueryParams);
-			if (isHit) TraceEnd = OutHit.ImpactPoint;
-
-			FVector MuzzleLocation = GetMesh()->GetSocketLocation(TEXT("MySocketHandR"));
-			FRotator MuzzleRotation = (TraceEnd - MuzzleLocation).Rotation();
+			FVector MuzzleLocation = GetMesh()->GetSocketLocation(TEXT("MyMuzzleSocket"));
+			FRotator MuzzleRotation = bUseControllerRotationYaw ? (AimingTargetLocation - MuzzleLocation).Rotation() : GetActorRotation();
 
 			FActorSpawnParameters SpawnParams;
 			SpawnParams.Owner = this;
@@ -193,4 +222,9 @@ void AMyProjectCharacter::Fire()
 			}
 		}
 	}
+}
+
+void AMyProjectCharacter::StopFiring()
+{
+	IsFiring = false;
 }

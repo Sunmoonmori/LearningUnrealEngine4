@@ -74,6 +74,14 @@ public:
 public:
 	UFUNCTION()
 	void Fire();
+	
+	UFUNCTION()
+	void StopFiring();
+
+	UFUNCTION()
+	void UpdateAimingTargetLocation();
+
+	virtual void Tick(float DeltaTime) override;
 
 protected:
 	UPROPERTY(EditDefaultsOnly, Category = Projectile)
@@ -81,5 +89,14 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Components)
 	UMyCharacterAttributeComponent* AttributeComp;
+
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = Rifle)
+	FVector AimingTargetLocation;
+
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = Rifle)
+	bool CanFire;
+
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = Rifle)
+	bool IsFiring;
 };
 

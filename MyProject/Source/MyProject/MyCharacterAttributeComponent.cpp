@@ -3,7 +3,6 @@
 
 #include "MyCharacterAttributeComponent.h"
 
-#define MY_FLOAT_DELTA 1e-4
 
 // Sets default values for this component's properties
 UMyCharacterAttributeComponent::UMyCharacterAttributeComponent()
@@ -40,7 +39,7 @@ void UMyCharacterAttributeComponent::TickComponent(float DeltaTime, ELevelTick T
 
 	// ...
 
-	if (MagicPoint < MaxMagicPoint - MY_FLOAT_DELTA)
+	if (MagicPoint < MaxMagicPoint)
 	{
 		ApplyMagicPointChange(MagicPointRecoveredPerSecond * DeltaTime);
 	}
