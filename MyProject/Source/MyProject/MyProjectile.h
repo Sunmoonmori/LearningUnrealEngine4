@@ -25,21 +25,15 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	UPROPERTY(VisibleDefaultsOnly, Category = Projectile)
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = Projectile)
 	USphereComponent* CollisionComponent;
 
-	UPROPERTY(VisibleAnywhere, Category = Movement)
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = Movement)
 	UProjectileMovementComponent* ProjectileMovementComponent;
-
-	UPROPERTY(VisibleDefaultsOnly, Category = Projectile)
-	UStaticMeshComponent* ProjectileMeshComponent;
-
-	UPROPERTY(VisibleDefaultsOnly, Category = Movement)
-	UMaterialInstanceDynamic* ProjectileMaterialInstance;
 
 	UFUNCTION(BlueprintCallable, Category = Fire)
 	void FireInDirection(const FVector& ShootDirection);
 
-	UFUNCTION(BlueprintCallable, Category = Hit)
+	UFUNCTION(BlueprintNativeEvent, Category = Hit) 
 	void OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComponent, FVector NormalImpulse, const FHitResult& Hit);
 };
