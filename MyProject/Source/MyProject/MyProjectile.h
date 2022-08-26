@@ -37,8 +37,9 @@ public:
 	UPROPERTY(VisibleDefaultsOnly, Category = Movement)
 	UMaterialInstanceDynamic* ProjectileMaterialInstance;
 
+	UFUNCTION(BlueprintCallable, Category = Fire)
 	void FireInDirection(const FVector& ShootDirection);
 
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable, Category = Hit)
 	void OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComponent, FVector NormalImpulse, const FHitResult& Hit);
 };
