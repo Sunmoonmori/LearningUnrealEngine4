@@ -29,3 +29,10 @@
 链接：https://pan.baidu.com/s/1ovR6kJrcsyFGDAfEASVg0w 
 提取码：jcin 
 ```
+
+1. Lesson 6 (MyProject at commit 76d8ab3)
+
+```
+链接: https://pan.baidu.com/s/1Xw46uKED2bu0ctbrmqqeqg
+提取码: jrp6
+```
