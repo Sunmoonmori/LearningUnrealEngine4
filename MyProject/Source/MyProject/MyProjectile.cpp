@@ -14,6 +14,7 @@ AMyProjectile::AMyProjectile()
 		CollisionComponent = CreateDefaultSubobject<USphereComponent>(TEXT("SphereComponent"));
 		CollisionComponent->BodyInstance.SetCollisionProfileName(TEXT("MyProjectile"));
 		CollisionComponent->OnComponentHit.AddDynamic(this, &AMyProjectile::OnHit);
+		CollisionComponent->bReturnMaterialOnMove = true;
 		CollisionComponent->InitSphereRadius(15.0f);
 		RootComponent = CollisionComponent;
 	}
