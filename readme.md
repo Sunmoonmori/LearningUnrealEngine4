@@ -34,3 +34,10 @@
     链接: https://pan.baidu.com/s/1Xw46uKED2bu0ctbrmqqeqg
     提取码: jrp6
     ```
+
+1. Lesson 7 (MyProject at commit 7efb670)
+
+    ```
+    链接: https://pan.baidu.com/s/19t8u3OnxtwsLWJp1qG0V-A
+    提取码: tc5t
+    ```
