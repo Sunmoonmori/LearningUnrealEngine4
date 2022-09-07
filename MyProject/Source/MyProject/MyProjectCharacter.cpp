@@ -84,6 +84,8 @@ void AMyProjectCharacter::SetupPlayerInputComponent(class UInputComponent* Playe
 
 	PlayerInputComponent->BindAction("Fire", IE_Pressed, this, &AMyProjectCharacter::Fire);
 	PlayerInputComponent->BindAction("Fire", IE_Released, this, &AMyProjectCharacter::StopFiring);
+
+	PlayerInputComponent->BindAction("Interact", IE_Released, this, &AMyProjectCharacter::Interact);
 }
 
 
@@ -227,4 +229,40 @@ void AMyProjectCharacter::Fire()
 void AMyProjectCharacter::StopFiring()
 {
 	IsFiring = false;
+}
+
+void AMyProjectCharacter::PickUpGun(AMyGun* TargetGun)
+{
+	if (Gun)
+	{
+		DropGun();
+	}
+	Gun = TargetGun;
+	TargetGun->OnGunPickedUp();
+	TargetGun->AttachToComponent(GetMesh(), FAttachmentTransformRules(EAttachmentRule::SnapToTarget, true), TEXT("RifleHoldSocket"));
+}
+
+void AMyProjectCharacter::DropGun()
+{
+	if (Gun)
+	{
+		Gun->DetachFromActor(FDetachmentTransformRules(EDetachmentRule::KeepWorld, false));
+		Gun->OnGunDropped();
+		Gun = nullptr;
+	}
+}
+
+void AMyProjectCharacter::Interact()
+{
+	TArray<AActor*> OverlappingActors;
+	GetCapsuleComponent()->GetOverlappingActors(OverlappingActors);
+	for (AActor* a : OverlappingActors)
+	{
+		AMyGun* MyGunActor = Cast<AMyGun>(a);
+		if (MyGunActor)
+		{
+			MyGunActor->Interaction(this);
+			break;
+		}
+	}
 }

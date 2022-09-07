@@ -6,6 +6,7 @@
 #include "GameFramework/Character.h"
 #include "MyProjectile.h"
 #include "MyCharacterAttributeComponent.h"
+#include "MyGun.h"
 #include "MyProjectCharacter.generated.h"
 
 UCLASS(config=Game)
@@ -81,7 +82,16 @@ public:
 	UFUNCTION()
 	void UpdateAimingTargetLocation();
 
+	UFUNCTION()
+	void PickUpGun(AMyGun* TargetGun);
+
+	UFUNCTION()
+	void DropGun();
+
 	virtual void Tick(float DeltaTime) override;
+
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = Gun)
+	AMyGun* Gun;
 
 protected:
 	UPROPERTY(EditDefaultsOnly, Category = Projectile)
@@ -90,13 +100,16 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Components)
 	UMyCharacterAttributeComponent* AttributeComp;
 
-	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = Rifle)
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = Gun)
 	FVector AimingTargetLocation;
 
-	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = Rifle)
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = Gun)
 	bool CanFire;
 
-	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = Rifle)
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = Gun)
 	bool IsFiring;
+
+	UFUNCTION()
+	void Interact();
 };
 
