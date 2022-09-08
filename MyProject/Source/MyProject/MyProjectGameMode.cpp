@@ -76,3 +76,21 @@ void AMyProjectGameMode::ReadSaveGame(const FString& SlotName, const int32 UserI
 		CurrentMySaveGame = Cast<UMySaveGame>(UGameplayStatics::CreateSaveGameObject(UMySaveGame::StaticClass()));
 	}
 }
+
+void AMyProjectGameMode::RespawnCharacter(APlayerController* PC)
+{
+	APawn* ControlledPawn = PC->GetPawn();
+	if (ControlledPawn)
+	{
+		ControlledPawn->Destroy();
+	}
+
+	FActorSpawnParameters SpawnParams;
+	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+
+	AMyProjectCharacter* Character = GetWorld()->SpawnActor<AMyProjectCharacter>(CharacterClass, CharacterSpawnTransform, SpawnParams);
+	if (Character)
+	{
+		PC->Possess(Character);
+	}
+}

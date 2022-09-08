@@ -31,6 +31,9 @@ public:
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = Movement)
 	UProjectileMovementComponent* ProjectileMovementComponent;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Projectile)
+	float Damage;
+
 	UFUNCTION(BlueprintCallable, Category = Fire)
 	void FireInDirection(const FVector& ShootDirection);
 

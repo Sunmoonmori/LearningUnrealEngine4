@@ -73,29 +73,34 @@ public:
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
 
 public:
-	UFUNCTION()
-	void Fire();
-	
-	UFUNCTION()
-	void StopFiring();
+	virtual void Tick(float DeltaTime) override;
 
 	UFUNCTION()
 	void UpdateAimingTargetLocation();
 
 	UFUNCTION()
-	void PickUpGun(AMyGun* TargetGun);
+	void Fire();
+
+	UFUNCTION(Server, Reliable)
+	void ServerFire();
 
 	UFUNCTION()
-	void DropGun();
+	void StopFiring();
 
-	virtual void Tick(float DeltaTime) override;
+	UFUNCTION(Server, Reliable)
+	void ServerStopFiring();
 
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = Gun)
 	AMyGun* Gun;
 
-protected:
-	UPROPERTY(EditDefaultsOnly, Category = Projectile)
-	TSubclassOf<class AMyProjectile> ProjectileClass;
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, ReplicatedUsing = "OnRep_GunChanged", Category = Gun)
+	AMyGun* GunToBePickedUp;
+
+	UFUNCTION(BlueprintCallable, Category = Gun)
+	void PickUpGun();
+
+	UFUNCTION()
+	void OnRep_GunChanged();
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Components)
 	UMyCharacterAttributeComponent* AttributeComp;
@@ -104,12 +109,19 @@ protected:
 	FVector AimingTargetLocation;
 
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = Gun)
-	bool CanFire;
-
-	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = Gun)
-	bool IsFiring;
+	bool bCanFire;
 
 	UFUNCTION()
 	void Interact();
+
+	UFUNCTION(Server, Reliable)
+	void ServerInteract();
+
+	UFUNCTION()
+	void Die();
+
+protected:
+	UFUNCTION()
+	void EnableRagdoll();
 };
 

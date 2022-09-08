@@ -2,6 +2,8 @@
 
 
 #include "MyCharacterAttributeComponent.h"
+#include "MyProjectCharacter.h"
+#include "Net/UnrealNetwork.h"
 
 
 // Sets default values for this component's properties
@@ -19,6 +21,8 @@ UMyCharacterAttributeComponent::UMyCharacterAttributeComponent()
 	MagicPoint = MaxMagicPoint;
 	MagicPointConsumedPerFiring = 13.f;
 	MagicPointRecoveredPerSecond = 5.f;
+
+	SetIsReplicatedByDefault(true);
 }
 
 
@@ -36,6 +40,12 @@ void UMyCharacterAttributeComponent::BeginPlay()
 void UMyCharacterAttributeComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+
+	APawn* MyPawn = Cast<APawn>(GetOwner());
+	if (!MyPawn->IsLocallyControlled())
+	{
+		return;
+	}
 
 	// ...
 
@@ -61,7 +71,16 @@ bool UMyCharacterAttributeComponent::ApplyHitPointChange(float Delta)
 
 	if (HitPoint > MaxHitPoint) HitPoint = MaxHitPoint;
 
-	OnHitPointChanged.Broadcast(nullptr, this, HitPoint, Delta);
+	MulticastOnHitPointChanged(nullptr, HitPoint, Delta);
+
+	if (HitPoint <= 0.f && Delta < 0.f)
+	{
+		AMyProjectCharacter* Character = Cast<AMyProjectCharacter>(GetOwner());
+		if (Character)
+		{
+			Character->Die();
+		}
+	}
 
 	return true;
 }
@@ -82,7 +101,7 @@ bool UMyCharacterAttributeComponent::ApplyMagicPointChange(float Delta)
 
 	if (MagicPoint > MaxMagicPoint) MagicPoint = MaxMagicPoint;
 
-	OnMagicPointChanged.Broadcast(nullptr, this, MagicPoint, Delta);
+	MulticastOnMagicPointChanged(nullptr, MagicPoint, Delta);
 
 	return true;
 }
@@ -102,3 +121,23 @@ float UMyCharacterAttributeComponent::GetMagicPointConsumed()
 {
 	return MagicPointConsumedPerFiring;
 }
+
+void UMyCharacterAttributeComponent::MulticastOnHitPointChanged_Implementation(AActor* InstigatorActor, float NewHitPoint, float Delta)
+{
+	OnHitPointChanged.Broadcast(InstigatorActor, this, NewHitPoint, Delta);
+}
+
+void UMyCharacterAttributeComponent::MulticastOnMagicPointChanged_Implementation(AActor* InstigatorActor, float NewMagicPoint, float Delta)
+{
+	OnMagicPointChanged.Broadcast(InstigatorActor, this, NewMagicPoint, Delta);
+}
+
+void UMyCharacterAttributeComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(UMyCharacterAttributeComponent, MaxHitPoint);
+	DOREPLIFETIME(UMyCharacterAttributeComponent, MaxMagicPoint);
+	DOREPLIFETIME(UMyCharacterAttributeComponent, HitPoint);
+	DOREPLIFETIME(UMyCharacterAttributeComponent, MagicPoint);
+} // TODO: change broadcast

@@ -24,14 +24,17 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	UFUNCTION(BlueprintCallable)
-	void Interaction(AActor* InteractionInstigator);
-
 	UFUNCTION()
 	void OnGunPickedUp();
 
 	UFUNCTION()
 	void OnGunDropped();
+
+	UFUNCTION()
+	void StartFire(AActor* FireInstigator);
+
+	UFUNCTION()
+	void StopFire();
 
 protected:
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = Interaction)
@@ -40,4 +43,9 @@ protected:
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = Mesh)
 	UStaticMeshComponent* MeshComponent;
 
+	UPROPERTY(EditDefaultsOnly, Category = Projectile)
+	TSubclassOf<class AMyProjectile> ProjectileClass;
+
+	UPROPERTY()
+	bool bIsFiring;
 };

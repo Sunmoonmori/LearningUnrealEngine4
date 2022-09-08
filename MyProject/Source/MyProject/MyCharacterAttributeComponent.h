@@ -27,16 +27,16 @@ public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 protected:
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Attribute)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Replicated, Category = Attribute)
 	float MaxHitPoint;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Attribute)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Replicated, Category = Attribute)
 	float MaxMagicPoint;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Attribute)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Replicated, Category = Attribute)
 	float HitPoint;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Attribute)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Replicated, Category = Attribute)
 	float MagicPoint;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Attribute)
@@ -51,6 +51,12 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = Attribute)
 	bool ApplyMagicPointChange(float Delta);
+
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastOnHitPointChanged(AActor* InstigatorActor, float NewHitPoint, float Delta);
+
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastOnMagicPointChanged(AActor* InstigatorActor, float NewMagicPoint, float Delta);
 
 	UFUNCTION(BlueprintCallable, Category = Attribute)
 	float GetHitPoint();

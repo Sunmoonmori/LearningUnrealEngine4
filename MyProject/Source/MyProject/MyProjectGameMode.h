@@ -23,14 +23,26 @@ protected:
 	UMySaveGame* CurrentMySaveGame;
 
 public:
+	UPROPERTY()
+	TSubclassOf<class AMyProjectCharacter> CharacterClass;
+
+	UPROPERTY()
+	FTransform CharacterSpawnTransform;
+
+	UFUNCTION()
 	void InitGame(const FString& MapName, const FString& Options, FString& ErrorMessage) override;
 
+	UFUNCTION()
 	void HandleStartingNewPlayer_Implementation(APlayerController* NewPlayer) override;
 
 	UFUNCTION(BlueprintCallable, Category = SaveGame)
 	void WriteSaveGame(const FString& SlotName, const int32 UserIndex=0);
 
+	UFUNCTION()
 	void ReadSaveGame(const FString& SlotName, const int32 UserIndex=0);
+
+	UFUNCTION()
+	void RespawnCharacter(APlayerController* PC);
 };
 
 

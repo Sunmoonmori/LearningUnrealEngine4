@@ -23,15 +23,19 @@ AMyProjectile::AMyProjectile()
 	{
 		ProjectileMovementComponent = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("ProjectileMovementComponent"));
 		ProjectileMovementComponent->SetUpdatedComponent(CollisionComponent);
-		ProjectileMovementComponent->InitialSpeed = 3000.0f;
-		ProjectileMovementComponent->MaxSpeed = 3000.0f;
+		ProjectileMovementComponent->InitialSpeed = 2000.0f;
+		ProjectileMovementComponent->MaxSpeed = 2000.0f;
 		ProjectileMovementComponent->bRotationFollowsVelocity = true;
-		ProjectileMovementComponent->bShouldBounce = false;
-		ProjectileMovementComponent->Bounciness = 0.3f;
-		ProjectileMovementComponent->ProjectileGravityScale = 0.0f;
+		ProjectileMovementComponent->bShouldBounce = true;
+		ProjectileMovementComponent->ProjectileGravityScale = 1.0f;
+		ProjectileMovementComponent->BounceVelocityStopSimulatingThreshold = 500.0f;
 	}
 
-	InitialLifeSpan = 3.0f;
+	InitialLifeSpan = 10.0f;
+
+	SetReplicates(true);
+
+	Damage = 30.f;
 }
 
 // Called when the game starts or when spawned
@@ -55,5 +59,5 @@ void AMyProjectile::FireInDirection(const FVector& ShootDirection)
 
 void AMyProjectile::OnHit_Implementation(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComponent, FVector NormalImpulse, const FHitResult& Hit)
 {
-    Destroy();
+	Destroy();
 }

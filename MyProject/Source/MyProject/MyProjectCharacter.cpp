@@ -9,6 +9,7 @@
 #include "GameFramework/Controller.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "MyPlayerState.h"
+#include "Net/UnrealNetwork.h"
 
 //////////////////////////////////////////////////////////////////////////
 // AMyProjectCharacter
@@ -50,8 +51,8 @@ AMyProjectCharacter::AMyProjectCharacter()
 
 	AttributeComp = CreateDefaultSubobject<UMyCharacterAttributeComponent>(TEXT("AttributeComp"));
 
-	CanFire = true;
-	IsFiring = false;
+	bCanFire = true;
+	Gun = nullptr;
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -102,12 +103,12 @@ void AMyProjectCharacter::OnResetVR()
 
 void AMyProjectCharacter::TouchStarted(ETouchIndex::Type FingerIndex, FVector Location)
 {
-		Jump();
+	Jump();
 }
 
 void AMyProjectCharacter::TouchStopped(ETouchIndex::Type FingerIndex, FVector Location)
 {
-		StopJumping();
+	StopJumping();
 }
 
 void AMyProjectCharacter::TurnAtRate(float Rate)
@@ -187,82 +188,109 @@ void AMyProjectCharacter::Tick(float DeltaTime)
 
 void AMyProjectCharacter::Fire()
 {
-	if (!CanFire || IsFiring) return;
-
-	if (AttributeComp->GetMagicPoint() < 0.f) return;
-
-	IsFiring = true;
-
-	if (ProjectileClass)
+	if (HasAuthority())
 	{
-		UWorld* World = GetWorld();
-		if (World)
+		if (bCanFire && Gun)
 		{
-			FVector MuzzleLocation = GetMesh()->GetSocketLocation(TEXT("MyMuzzleSocket"));
-			FRotator MuzzleRotation = bUseControllerRotationYaw ? (AimingTargetLocation - MuzzleLocation).Rotation() : GetActorRotation();
-
-			FActorSpawnParameters SpawnParams;
-			SpawnParams.Owner = this;
-			SpawnParams.Instigator = GetInstigator();
-			SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-
-			AMyProjectile* Projectile = World->SpawnActor<AMyProjectile>(ProjectileClass, MuzzleLocation, MuzzleRotation, SpawnParams);
-			if (Projectile)
-			{
-				// consume MP
-				AttributeComp->ApplyMagicPointChange(-AttributeComp->GetMagicPointConsumed());
-
-				// add Score
-				AMyPlayerState* PS = GetPlayerState<AMyPlayerState>();
-				if (PS)
-				{
-					PS->ApplyMyScoreChange(1);
-				}
-
-				FVector LaunchDirection = MuzzleRotation.Vector();
-				Projectile->FireInDirection(LaunchDirection);
-			}
+			Gun->StartFire(this);
 		}
 	}
+	else
+	{
+		ServerFire();
+	}
+}
+
+void AMyProjectCharacter::ServerFire_Implementation()
+{
+	Fire();
 }
 
 void AMyProjectCharacter::StopFiring()
 {
-	IsFiring = false;
-}
-
-void AMyProjectCharacter::PickUpGun(AMyGun* TargetGun)
-{
-	if (Gun)
+	if (HasAuthority())
 	{
-		DropGun();
+		if (Gun)
+		{
+			Gun->StopFire();
+		}
 	}
-	Gun = TargetGun;
-	TargetGun->OnGunPickedUp();
-	TargetGun->AttachToComponent(GetMesh(), FAttachmentTransformRules(EAttachmentRule::SnapToTarget, true), TEXT("RifleHoldSocket"));
+	else
+	{
+		ServerStopFiring();
+	}
 }
 
-void AMyProjectCharacter::DropGun()
+void AMyProjectCharacter::ServerStopFiring_Implementation()
+{
+	StopFiring();
+}
+
+void AMyProjectCharacter::PickUpGun()
 {
 	if (Gun)
 	{
 		Gun->DetachFromActor(FDetachmentTransformRules(EDetachmentRule::KeepWorld, false));
 		Gun->OnGunDropped();
-		Gun = nullptr;
 	}
+	GunToBePickedUp->OnGunPickedUp();
+	GunToBePickedUp->AttachToComponent(GetMesh(), FAttachmentTransformRules(EAttachmentRule::SnapToTarget, true), TEXT("RifleHoldSocket"));
+	Gun = GunToBePickedUp;
+}
+
+void AMyProjectCharacter::OnRep_GunChanged()
+{
+	PickUpGun();
 }
 
 void AMyProjectCharacter::Interact()
 {
-	TArray<AActor*> OverlappingActors;
-	GetCapsuleComponent()->GetOverlappingActors(OverlappingActors);
-	for (AActor* a : OverlappingActors)
+	if (HasAuthority())
 	{
-		AMyGun* MyGunActor = Cast<AMyGun>(a);
-		if (MyGunActor)
+		TArray<AActor*> OverlappingActors;
+		GetCapsuleComponent()->GetOverlappingActors(OverlappingActors);
+		for (AActor* a : OverlappingActors)
 		{
-			MyGunActor->Interaction(this);
-			break;
+			AMyGun* MyGunActor = Cast<AMyGun>(a);
+			if (MyGunActor)
+			{
+				GunToBePickedUp = MyGunActor;
+				PickUpGun();
+				break;
+			}
 		}
 	}
+	else
+	{
+		ServerInteract();
+	}
+
+}
+
+void AMyProjectCharacter::ServerInteract_Implementation()
+{
+	Interact();
+}
+
+void AMyProjectCharacter::Die()
+{
+	// TODO
+}
+
+void AMyProjectCharacter::EnableRagdoll()
+{
+	// TODO: Collision Channel
+	GetMesh()->SetSimulatePhysics(true);
+	GetMesh()->WakeAllRigidBodies();
+	GetMesh()->bBlendPhysics = true;
+	GetCharacterMovement()->StopMovementImmediately();
+	GetCharacterMovement()->DisableMovement();
+	GetCharacterMovement()->SetComponentTickEnabled(false);
+}
+
+void AMyProjectCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(AMyProjectCharacter, GunToBePickedUp);
 }
