@@ -45,18 +45,26 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Attribute)
 	float MagicPointRecoveredPerSecond;
 
-public:
-	UFUNCTION(BlueprintCallable, Category = Attribute)
-	bool ApplyHitPointChange(float Delta);
-
-	UFUNCTION(BlueprintCallable, Category = Attribute)
-	bool ApplyMagicPointChange(float Delta);
-
 	UFUNCTION(NetMulticast, Reliable)
 	void MulticastOnHitPointChanged(AActor* InstigatorActor, float NewHitPoint, float Delta);
 
 	UFUNCTION(NetMulticast, Reliable)
 	void MulticastOnMagicPointChanged(AActor* InstigatorActor, float NewMagicPoint, float Delta);
+
+	UPROPERTY(BlueprintAssignable)
+	FOnHitPointChanged OnHitPointChanged;
+
+	UPROPERTY(BlueprintAssignable)
+	FOnMagicPointChanged OnMagicPointChanged;
+
+public:
+	// Should Be Executed By Server Functions Only
+	UFUNCTION(BlueprintCallable, Category = Attribute)
+	bool ApplyHitPointChange(AActor* InstigatorActor, float Delta);
+
+	// Should Be Executed By Server Functions Only
+	UFUNCTION(BlueprintCallable, Category = Attribute)
+	bool ApplyMagicPointChange(AActor* InstigatorActor, float Delta);
 
 	UFUNCTION(BlueprintCallable, Category = Attribute)
 	float GetHitPoint();
@@ -66,11 +74,4 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = Attribute)
 	float GetMagicPointConsumed();
-
-	UPROPERTY(BlueprintAssignable)
-	FOnHitPointChanged OnHitPointChanged;
-
-	UPROPERTY(BlueprintAssignable)
-	FOnMagicPointChanged OnMagicPointChanged;
-		
 };

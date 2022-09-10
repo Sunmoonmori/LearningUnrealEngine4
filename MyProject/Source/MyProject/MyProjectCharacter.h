@@ -75,6 +75,8 @@ public:
 public:
 	virtual void Tick(float DeltaTime) override;
 
+	virtual void Destroyed() override;
+
 	UFUNCTION()
 	void UpdateAimingTargetLocation();
 
@@ -93,11 +95,14 @@ public:
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = Gun)
 	AMyGun* Gun;
 
-	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, ReplicatedUsing = "OnRep_GunChanged", Category = Gun)
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, ReplicatedUsing = OnRep_GunChanged, Category = Gun)
 	AMyGun* GunToBePickedUp;
 
 	UFUNCTION(BlueprintCallable, Category = Gun)
 	void PickUpGun();
+
+	UFUNCTION()
+	void DropGun();
 
 	UFUNCTION()
 	void OnRep_GunChanged();
@@ -117,11 +122,32 @@ public:
 	UFUNCTION(Server, Reliable)
 	void ServerInteract();
 
+	UPROPERTY(ReplicatedUsing = OnRep_KilledBy)
+	AActor* KilledBy;
+
 	UFUNCTION()
-	void Die();
+	void OnRep_KilledBy();
+
+	// Should Be Executed By Server Functions Only
+	UFUNCTION()
+	void Die(AActor* InstigatorActor);
+
+	UFUNCTION(Server, Reliable)
+	void ServerDie(AActor* InstigatorActor);
 
 protected:
+	virtual void BeginPlay() override;
+
+	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = Respawn)
+	float RespawnInterval;
+
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = Respawn)
+	FTransform SpawnTransform;
+
 	UFUNCTION()
 	void EnableRagdoll();
+
+	UFUNCTION()
+	void CallRespawnPlayer();
 };
 

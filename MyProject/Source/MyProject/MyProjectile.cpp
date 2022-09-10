@@ -33,9 +33,9 @@ AMyProjectile::AMyProjectile()
 
 	InitialLifeSpan = 10.0f;
 
-	SetReplicates(true);
+	bReplicates = true;
 
-	Damage = 30.f;
+	Damage = 110.f;
 }
 
 // Called when the game starts or when spawned

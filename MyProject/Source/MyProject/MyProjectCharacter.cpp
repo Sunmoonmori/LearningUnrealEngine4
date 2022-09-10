@@ -10,6 +10,8 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "MyPlayerState.h"
 #include "Net/UnrealNetwork.h"
+#include "Kismet/GameplayStatics.h"
+#include "MyProjectGameMode.h"
 
 //////////////////////////////////////////////////////////////////////////
 // AMyProjectCharacter
@@ -53,6 +55,10 @@ AMyProjectCharacter::AMyProjectCharacter()
 
 	bCanFire = true;
 	Gun = nullptr;
+
+	KilledBy = nullptr;
+
+	RespawnInterval = 2.f;
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -152,6 +158,31 @@ void AMyProjectCharacter::MoveRight(float Value)
 	}
 }
 
+//////////////////////////////////////////////////////////////////////////
+// Override
+
+void AMyProjectCharacter::BeginPlay()
+{
+	Super::BeginPlay();
+
+	SpawnTransform = GetActorTransform();
+}
+
+void AMyProjectCharacter::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+
+	UpdateAimingTargetLocation();
+}
+
+void AMyProjectCharacter::Destroyed()
+{
+	Super::Destroyed();
+}
+
+//////////////////////////////////////////////////////////////////////////
+// AimingTarget
+
 void AMyProjectCharacter::UpdateAimingTargetLocation()
 {
 	UWorld* World = GetWorld();
@@ -179,12 +210,8 @@ void AMyProjectCharacter::UpdateAimingTargetLocation()
 	}
 }
 
-void AMyProjectCharacter::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-
-	UpdateAimingTargetLocation();
-}
+//////////////////////////////////////////////////////////////////////////
+// Action
 
 void AMyProjectCharacter::Fire()
 {
@@ -228,14 +255,23 @@ void AMyProjectCharacter::ServerStopFiring_Implementation()
 
 void AMyProjectCharacter::PickUpGun()
 {
-	if (Gun)
+	if (GunToBePickedUp)
 	{
-		Gun->DetachFromActor(FDetachmentTransformRules(EDetachmentRule::KeepWorld, false));
-		Gun->OnGunDropped();
+		if (Gun)
+		{
+			DropGun();
+		}
+		GunToBePickedUp->OnGunPickedUp();
+		GunToBePickedUp->AttachToComponent(GetMesh(), FAttachmentTransformRules(EAttachmentRule::SnapToTarget, true), TEXT("RifleHoldSocket"));
+		Gun = GunToBePickedUp;
 	}
-	GunToBePickedUp->OnGunPickedUp();
-	GunToBePickedUp->AttachToComponent(GetMesh(), FAttachmentTransformRules(EAttachmentRule::SnapToTarget, true), TEXT("RifleHoldSocket"));
-	Gun = GunToBePickedUp;
+}
+
+void AMyProjectCharacter::DropGun()
+{
+	Gun->DetachFromActor(FDetachmentTransformRules(EDetachmentRule::KeepWorld, false));
+	Gun->OnGunDropped();
+	Gun = nullptr;
 }
 
 void AMyProjectCharacter::OnRep_GunChanged()
@@ -255,7 +291,7 @@ void AMyProjectCharacter::Interact()
 			if (MyGunActor)
 			{
 				GunToBePickedUp = MyGunActor;
-				PickUpGun();
+				OnRep_GunChanged();
 				break;
 			}
 		}
@@ -272,14 +308,49 @@ void AMyProjectCharacter::ServerInteract_Implementation()
 	Interact();
 }
 
-void AMyProjectCharacter::Die()
+void AMyProjectCharacter::OnRep_KilledBy()
 {
-	// TODO
+	if (KilledBy)
+	{
+		GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		DropGun();
+		EnableRagdoll();
+	}
+}
+
+void AMyProjectCharacter::Die(AActor* InstigatorActor)
+{
+	if (HasAuthority())
+	{
+		if (!KilledBy) {
+			AMyProjectCharacter* InstigatorCharacter = Cast<AMyProjectCharacter>(InstigatorActor);
+			if (InstigatorCharacter)
+			{
+				InstigatorCharacter->GetPlayerState<AMyPlayerState>()->AddKill();
+			}
+			GetPlayerState<AMyPlayerState>()->AddDeath();
+
+			KilledBy = InstigatorActor;
+			OnRep_KilledBy();
+
+			FTimerHandle MemberTimerHandle;
+			GetWorldTimerManager().SetTimer(MemberTimerHandle, this, &AMyProjectCharacter::CallRespawnPlayer, RespawnInterval, false);
+		}
+	}
+	else
+	{
+		ServerDie(InstigatorActor);
+	}
+}
+
+void AMyProjectCharacter::ServerDie_Implementation(AActor* InstigatorActor)
+{
+	Die(InstigatorActor);
 }
 
 void AMyProjectCharacter::EnableRagdoll()
 {
-	// TODO: Collision Channel
+	GetMesh()->SetCollisionEnabled(ECollisionEnabled::PhysicsOnly);
 	GetMesh()->SetSimulatePhysics(true);
 	GetMesh()->WakeAllRigidBodies();
 	GetMesh()->bBlendPhysics = true;
@@ -288,9 +359,24 @@ void AMyProjectCharacter::EnableRagdoll()
 	GetCharacterMovement()->SetComponentTickEnabled(false);
 }
 
+void AMyProjectCharacter::CallRespawnPlayer()
+{
+	APlayerController* PC = Cast<APlayerController>(GetController());
+	UWorld* World = GetWorld();
+	if (PC && World)
+	{
+		AMyProjectGameMode* GM = Cast<AMyProjectGameMode>(World->GetAuthGameMode());
+		if (GM)
+		{
+			GM->RespawnPlayer(PC, SpawnTransform);
+		}
+	}
+}
+
 void AMyProjectCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(AMyProjectCharacter, GunToBePickedUp);
+	DOREPLIFETIME(AMyProjectCharacter, KilledBy);
 }

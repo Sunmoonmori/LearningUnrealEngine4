@@ -31,66 +31,68 @@ void AMyProjectGameMode::InitGame(const FString& MapName, const FString& Options
 {
 	Super::InitGame(MapName, Options, ErrorMessage);
 
-	ReadSaveGame(DefaultSlotName);
+//	ReadSaveGame(DefaultSlotName);
 }
 
 void AMyProjectGameMode::HandleStartingNewPlayer_Implementation(APlayerController* NewPlayer)
 {
 	Super::HandleStartingNewPlayer_Implementation(NewPlayer);
 
-	// TODO: single player to multi player
-	AMyPlayerState* PS = NewPlayer->GetPlayerState<AMyPlayerState>();
-	if (PS)
-	{
-		PS->LoadFromMySaveGame(CurrentMySaveGame);
-	}
+//	// TODO: single player to multi player
+//	AMyPlayerState* PS = NewPlayer->GetPlayerState<AMyPlayerState>();
+//	if (PS)
+//	{
+//		PS->LoadFromMySaveGame(CurrentMySaveGame);
+//	}
 }
 
-void AMyProjectGameMode::WriteSaveGame(const FString& SlotName, const int32 UserIndex)
+void AMyProjectGameMode::RespawnPlayer(APlayerController* PlayerController, FTransform& ReSpawnTransform)
 {
-	// TODO: single player to multi player
-	AMyPlayerState* PS = Cast<AMyPlayerState>(GameState->PlayerArray[0]);
-	if (PS)
+	APawn* Pawn = PlayerController->GetPawn();
+	if (Pawn)
 	{
-		PS->SaveToMySaveGame(CurrentMySaveGame);
-	}
-
-	UGameplayStatics::SaveGameToSlot(CurrentMySaveGame, SlotName, UserIndex);
-}
-
-void AMyProjectGameMode::ReadSaveGame(const FString& SlotName, const int32 UserIndex)
-{
-	bool ShouldCreateNewMySaveGame = true;
-
-	if (UGameplayStatics::DoesSaveGameExist(SlotName, UserIndex))
-	{
-		CurrentMySaveGame = Cast<UMySaveGame>(UGameplayStatics::LoadGameFromSlot(SlotName, UserIndex));
-		if (CurrentMySaveGame)
-		{
-			ShouldCreateNewMySaveGame = false;
-		}
-	}
-
-	if (ShouldCreateNewMySaveGame)
-	{
-		CurrentMySaveGame = Cast<UMySaveGame>(UGameplayStatics::CreateSaveGameObject(UMySaveGame::StaticClass()));
-	}
-}
-
-void AMyProjectGameMode::RespawnCharacter(APlayerController* PC)
-{
-	APawn* ControlledPawn = PC->GetPawn();
-	if (ControlledPawn)
-	{
-		ControlledPawn->Destroy();
+		Pawn->Destroy();
 	}
 
 	FActorSpawnParameters SpawnParams;
-	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
 
-	AMyProjectCharacter* Character = GetWorld()->SpawnActor<AMyProjectCharacter>(CharacterClass, CharacterSpawnTransform, SpawnParams);
-	if (Character)
+	UWorld* World = GetWorld();
+	if (World)
 	{
-		PC->Possess(Character);
+		APawn* NewPawn = World->SpawnActor<APawn>(DefaultPawnClass, ReSpawnTransform, SpawnParams);
+		PlayerController->Possess(NewPawn);
 	}
 }
+
+
+//void AMyProjectGameMode::WriteSaveGame(const FString& SlotName, const int32 UserIndex)
+//{
+//	// TODO: single player to multi player
+//	AMyPlayerState* PS = Cast<AMyPlayerState>(GameState->PlayerArray[0]);
+//	if (PS)
+//	{
+//		PS->SaveToMySaveGame(CurrentMySaveGame);
+//	}
+//
+//	UGameplayStatics::SaveGameToSlot(CurrentMySaveGame, SlotName, UserIndex);
+//}
+//
+//void AMyProjectGameMode::ReadSaveGame(const FString& SlotName, const int32 UserIndex)
+//{
+//	bool ShouldCreateNewMySaveGame = true;
+//
+//	if (UGameplayStatics::DoesSaveGameExist(SlotName, UserIndex))
+//	{
+//		CurrentMySaveGame = Cast<UMySaveGame>(UGameplayStatics::LoadGameFromSlot(SlotName, UserIndex));
+//		if (CurrentMySaveGame)
+//		{
+//			ShouldCreateNewMySaveGame = false;
+//		}
+//	}
+//
+//	if (ShouldCreateNewMySaveGame)
+//	{
+//		CurrentMySaveGame = Cast<UMySaveGame>(UGameplayStatics::CreateSaveGameObject(UMySaveGame::StaticClass()));
+//	}
+//}

@@ -3,7 +3,6 @@
 
 #include "MyGun.h"
 #include "MyProjectCharacter.h"
-#include "MyPlayerState.h"
 
 // Sets default values
 AMyGun::AMyGun()
@@ -33,7 +32,7 @@ AMyGun::AMyGun()
 
 	bIsFiring = false;
 
-	SetReplicates(true);
+	bReplicates = true;
 }
 
 // Called when the game starts or when spawned
@@ -111,14 +110,7 @@ void AMyGun::StartFire(AActor* FireInstigator)
 	}
 
 	// consume MP
-	InstigatorAttributeComp->ApplyMagicPointChange(-InstigatorAttributeComp->GetMagicPointConsumed());
-
-	// add Score
-	AMyPlayerState* PS = FireInstigatorCharacter->GetPlayerState<AMyPlayerState>();
-	if (PS)
-	{
-		PS->ApplyMyScoreChange(1);
-	}
+	InstigatorAttributeComp->ApplyMagicPointChange(this, -InstigatorAttributeComp->GetMagicPointConsumed());
 }
 
 void AMyGun::StopFire()

@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/GameModeBase.h"
-#include "MySaveGame.h"
+//#include "MySaveGame.h"
 #include "MyProjectGameMode.generated.h"
 
 UCLASS(minimalapi)
@@ -19,30 +19,25 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = SaveGame)
 	FString DefaultSlotName;
 
-	UPROPERTY()
-	UMySaveGame* CurrentMySaveGame;
+//	UPROPERTY()
+//	UMySaveGame* CurrentMySaveGame;
 
 public:
-	UPROPERTY()
-	TSubclassOf<class AMyProjectCharacter> CharacterClass;
-
-	UPROPERTY()
-	FTransform CharacterSpawnTransform;
-
 	UFUNCTION()
 	void InitGame(const FString& MapName, const FString& Options, FString& ErrorMessage) override;
 
 	UFUNCTION()
 	void HandleStartingNewPlayer_Implementation(APlayerController* NewPlayer) override;
 
-	UFUNCTION(BlueprintCallable, Category = SaveGame)
-	void WriteSaveGame(const FString& SlotName, const int32 UserIndex=0);
-
+	// XXX: Should ReSpawnTransform use reference or not?
 	UFUNCTION()
-	void ReadSaveGame(const FString& SlotName, const int32 UserIndex=0);
+	void RespawnPlayer(APlayerController* PlayerController, FTransform& ReSpawnTransform);
 
-	UFUNCTION()
-	void RespawnCharacter(APlayerController* PC);
+//	UFUNCTION(BlueprintCallable, Category = SaveGame)
+//	void WriteSaveGame(const FString& SlotName, const int32 UserIndex=0);
+//
+//	UFUNCTION()
+//	void ReadSaveGame(const FString& SlotName, const int32 UserIndex=0);
 };
 
 

@@ -41,21 +41,15 @@ void UMyCharacterAttributeComponent::TickComponent(float DeltaTime, ELevelTick T
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	APawn* MyPawn = Cast<APawn>(GetOwner());
-	if (!MyPawn->IsLocallyControlled())
-	{
-		return;
-	}
-
 	// ...
 
 	if (MagicPoint < MaxMagicPoint)
 	{
-		ApplyMagicPointChange(MagicPointRecoveredPerSecond * DeltaTime);
+		ApplyMagicPointChange(GetOwner(), MagicPointRecoveredPerSecond * DeltaTime);
 	}
 }
 
-bool UMyCharacterAttributeComponent::ApplyHitPointChange(float Delta)
+bool UMyCharacterAttributeComponent::ApplyHitPointChange(AActor* InstigatorActor, float Delta)
 {
 	// HitPoint can not be bigger than zero
 	// HitPoint must be able to be less than zero
@@ -71,21 +65,21 @@ bool UMyCharacterAttributeComponent::ApplyHitPointChange(float Delta)
 
 	if (HitPoint > MaxHitPoint) HitPoint = MaxHitPoint;
 
-	MulticastOnHitPointChanged(nullptr, HitPoint, Delta);
+	MulticastOnHitPointChanged(InstigatorActor, HitPoint, Delta);
 
 	if (HitPoint <= 0.f && Delta < 0.f)
 	{
 		AMyProjectCharacter* Character = Cast<AMyProjectCharacter>(GetOwner());
 		if (Character)
 		{
-			Character->Die();
+			Character->Die(InstigatorActor);
 		}
 	}
 
 	return true;
 }
 
-bool UMyCharacterAttributeComponent::ApplyMagicPointChange(float Delta)
+bool UMyCharacterAttributeComponent::ApplyMagicPointChange(AActor* InstigatorActor, float Delta)
 {
 	// MagicPoint can not be bigger than zero
 	// MagicPoint must be able to be less than zero
@@ -101,7 +95,7 @@ bool UMyCharacterAttributeComponent::ApplyMagicPointChange(float Delta)
 
 	if (MagicPoint > MaxMagicPoint) MagicPoint = MaxMagicPoint;
 
-	MulticastOnMagicPointChanged(nullptr, MagicPoint, Delta);
+	MulticastOnMagicPointChanged(InstigatorActor, MagicPoint, Delta);
 
 	return true;
 }
@@ -140,4 +134,4 @@ void UMyCharacterAttributeComponent::GetLifetimeReplicatedProps(TArray<FLifetime
 	DOREPLIFETIME(UMyCharacterAttributeComponent, MaxMagicPoint);
 	DOREPLIFETIME(UMyCharacterAttributeComponent, HitPoint);
 	DOREPLIFETIME(UMyCharacterAttributeComponent, MagicPoint);
-} // TODO: change broadcast
+}
