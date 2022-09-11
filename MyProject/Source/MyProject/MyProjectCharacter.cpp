@@ -312,9 +312,16 @@ void AMyProjectCharacter::OnRep_KilledBy()
 {
 	if (KilledBy)
 	{
+		DisableInput(nullptr); // TODO: only disable some of the input
 		GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 		DropGun();
-		EnableRagdoll();
+		GetMesh()->SetCollisionEnabled(ECollisionEnabled::PhysicsOnly);
+		GetMesh()->SetSimulatePhysics(true);
+		GetMesh()->WakeAllRigidBodies();
+		GetMesh()->bBlendPhysics = true;
+		GetCharacterMovement()->StopMovementImmediately();
+		GetCharacterMovement()->DisableMovement();
+		GetCharacterMovement()->SetComponentTickEnabled(false);
 	}
 }
 
@@ -346,17 +353,6 @@ void AMyProjectCharacter::Die(AActor* InstigatorActor)
 void AMyProjectCharacter::ServerDie_Implementation(AActor* InstigatorActor)
 {
 	Die(InstigatorActor);
-}
-
-void AMyProjectCharacter::EnableRagdoll()
-{
-	GetMesh()->SetCollisionEnabled(ECollisionEnabled::PhysicsOnly);
-	GetMesh()->SetSimulatePhysics(true);
-	GetMesh()->WakeAllRigidBodies();
-	GetMesh()->bBlendPhysics = true;
-	GetCharacterMovement()->StopMovementImmediately();
-	GetCharacterMovement()->DisableMovement();
-	GetCharacterMovement()->SetComponentTickEnabled(false);
 }
 
 void AMyProjectCharacter::CallRespawnPlayer()

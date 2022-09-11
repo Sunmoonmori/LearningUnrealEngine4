@@ -128,7 +128,6 @@ public:
 	UFUNCTION()
 	void OnRep_KilledBy();
 
-	// Should Be Executed By Server Functions Only
 	UFUNCTION()
 	void Die(AActor* InstigatorActor);
 
@@ -143,9 +142,6 @@ protected:
 
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = Respawn)
 	FTransform SpawnTransform;
-
-	UFUNCTION()
-	void EnableRagdoll();
 
 	UFUNCTION()
 	void CallRespawnPlayer();

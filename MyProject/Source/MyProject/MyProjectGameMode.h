@@ -16,6 +16,9 @@ public:
 	AMyProjectGameMode();
 
 protected:
+	UFUNCTION()
+	void GameOver();
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = SaveGame)
 	FString DefaultSlotName;
 
@@ -23,11 +26,11 @@ protected:
 //	UMySaveGame* CurrentMySaveGame;
 
 public:
-	UFUNCTION()
-	void InitGame(const FString& MapName, const FString& Options, FString& ErrorMessage) override;
+	virtual void InitGame(const FString& MapName, const FString& Options, FString& ErrorMessage) override;
 
-	UFUNCTION()
-	void HandleStartingNewPlayer_Implementation(APlayerController* NewPlayer) override;
+	virtual void StartPlay() override;
+
+	virtual void HandleStartingNewPlayer_Implementation(APlayerController* NewPlayer) override;
 
 	// XXX: Should ReSpawnTransform use reference or not?
 	UFUNCTION()

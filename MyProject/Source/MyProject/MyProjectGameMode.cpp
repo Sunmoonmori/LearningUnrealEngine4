@@ -4,6 +4,7 @@
 #include "MyProjectCharacter.h"
 #include "UObject/ConstructorHelpers.h"
 #include "MyPlayerState.h"
+#include "MyGameStateBase.h"
 #include "Kismet/GameplayStatics.h"
 #include "GameFramework/GameStateBase.h"
 
@@ -24,6 +25,8 @@ AMyProjectGameMode::AMyProjectGameMode()
 
 	PlayerStateClass = AMyPlayerState::StaticClass();
 
+	GameStateClass = AMyGameStateBase::StaticClass();
+
 	DefaultSlotName = TEXT("SlotName");
 }
 
@@ -32,6 +35,28 @@ void AMyProjectGameMode::InitGame(const FString& MapName, const FString& Options
 	Super::InitGame(MapName, Options, ErrorMessage);
 
 //	ReadSaveGame(DefaultSlotName);
+}
+
+void AMyProjectGameMode::StartPlay()
+{
+	Super::StartPlay();
+
+	AMyGameStateBase* GS = Cast<AMyGameStateBase>(GameState);
+	if (GS)
+	{
+		FTimerHandle MemberTimerHandle;
+		GetWorldTimerManager().SetTimer(MemberTimerHandle, this, &AMyProjectGameMode::GameOver, GS->GameOverTimeSecond, false);
+	}
+}
+
+void AMyProjectGameMode::GameOver()
+{
+	AMyGameStateBase* GS = Cast<AMyGameStateBase>(GameState);
+	if (GS)
+	{
+		GS->bIsGameOver = true;
+		GS->OnRep_GameOver();
+	}
 }
 
 void AMyProjectGameMode::HandleStartingNewPlayer_Implementation(APlayerController* NewPlayer)
