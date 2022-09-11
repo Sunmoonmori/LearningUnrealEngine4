@@ -67,6 +67,11 @@ void AMyPlayerState::SetNickName(const FString& NewNickName)
 	NickName = NewNickName;
 }
 
+void AMyPlayerState::ServerSetNickName_Implementation(const FString& NewNickName)
+{
+	NickName = NewNickName;
+}
+
 //int32 AMyPlayerState::GetCurrentScoreRecordIndex()
 //{
 //	int32 TargetIndex = ScoreRecordNum;

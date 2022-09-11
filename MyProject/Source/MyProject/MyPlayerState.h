@@ -78,6 +78,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = MyScore)
 	void SetNickName(const FString& NewNickName);
 
+	UFUNCTION(BlueprintCallable, Server, Reliable, Category = MyScore)
+	void ServerSetNickName(const FString& NewNickName);
+
 //	// current index of this playerstate in score record sheet of this playerstate
 //	UFUNCTION(BlueprintCallable, Category = ScoreRecord)
 //	int32 GetCurrentScoreRecordIndex();
