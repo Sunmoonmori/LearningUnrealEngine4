@@ -3,13 +3,12 @@
 
 #include "MyPlayerState.h"
 #include "Net/UnrealNetwork.h"
-#include "Misc/DateTime.h"
 
 AMyPlayerState::AMyPlayerState()
 {
 	KillCount = 0;
 	DeathCount = 0;
-	NickName = FString(TEXT("DefaultName-")) + FString::FromInt(FDateTime::Now().ToUnixTimestamp());
+	NickName = FString::Printf(TEXT("DefaultName-%02d"), FMath::RandRange(0, 99));
 }
 
 void AMyPlayerState::AddKill()

@@ -58,7 +58,7 @@ AMyProjectCharacter::AMyProjectCharacter()
 
 	KilledBy = nullptr;
 
-	RespawnInterval = 2.f;
+	RespawnInterval = 5.f;
 }
 
 //////////////////////////////////////////////////////////////////////////
