@@ -41,3 +41,10 @@
     链接: https://pan.baidu.com/s/19t8u3OnxtwsLWJp1qG0V-A
     提取码: tc5t
     ```
+
+1. Lesson 8 (MyProject at commit e8751b6)
+
+    ```
+    链接: https://pan.baidu.com/s/1hiNLknRIJmVxJqpLWcIBLA
+    提取码: g3dr
+    ```
