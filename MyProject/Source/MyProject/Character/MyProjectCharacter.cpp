@@ -269,9 +269,12 @@ void AMyProjectCharacter::PickUpGun()
 
 void AMyProjectCharacter::DropGun()
 {
-	Gun->DetachFromActor(FDetachmentTransformRules(EDetachmentRule::KeepWorld, false));
-	Gun->OnGunDropped();
-	Gun = nullptr;
+	if (Gun)
+	{
+		Gun->DetachFromActor(FDetachmentTransformRules(EDetachmentRule::KeepWorld, false));
+		Gun->OnGunDropped();
+		Gun = nullptr;
+	}
 }
 
 void AMyProjectCharacter::OnRep_GunChanged()

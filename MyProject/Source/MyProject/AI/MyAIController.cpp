@@ -11,6 +11,7 @@ void AMyAIController::BeginPlay()
 
 	RunBehaviorTree(BehaviorTree);
 
+	// TODO
 	APawn* TargetPawn = UGameplayStatics::GetPlayerPawn(this, 0);
 	if (TargetPawn)
 	{
