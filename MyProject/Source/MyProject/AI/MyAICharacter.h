@@ -6,6 +6,8 @@
 #include "GameFramework/Character.h"
 #include "MyAICharacter.generated.h"
 
+class UPawnSensingComponent;
+
 UCLASS()
 class MYPROJECT_API AMyAICharacter : public ACharacter
 {
@@ -16,10 +18,14 @@ public:
 	AMyAICharacter();
 
 protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
+	virtual void PostInitializeComponents() override;
 
-public:	
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
+	UPROPERTY(EditDefaultsOnly, Category = AI)
+	FName BlackBoardTargetActorKey;
+
+	UPROPERTY(VisibleAnywhere, Category = Components)
+	UPawnSensingComponent* PawnSensingComp;
+
+	UFUNCTION()
+	void OnPawnSeen(APawn* Pawn);
 };

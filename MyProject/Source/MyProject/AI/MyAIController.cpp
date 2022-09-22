@@ -9,12 +9,8 @@ void AMyAIController::BeginPlay()
 {
 	Super::BeginPlay();
 
-	RunBehaviorTree(BehaviorTree);
-
-	// TODO
-	APawn* TargetPawn = UGameplayStatics::GetPlayerPawn(this, 0);
-	if (TargetPawn)
+	if (ensure(BehaviorTree))
 	{
-		GetBlackboardComponent()->SetValueAsObject("TargetActor", TargetPawn);
+		RunBehaviorTree(BehaviorTree);
 	}
 }

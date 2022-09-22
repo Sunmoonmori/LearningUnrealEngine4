@@ -318,10 +318,10 @@ void AMyProjectCharacter::OnRep_KilledBy()
 		DisableInput(nullptr); // TODO: only disable some of the input
 		GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 		DropGun();
+		GetMesh()->SetCollisionProfileName("Ragdoll");
 		GetMesh()->SetCollisionEnabled(ECollisionEnabled::PhysicsOnly);
 		GetMesh()->SetSimulatePhysics(true);
-		GetMesh()->WakeAllRigidBodies();
-		GetMesh()->bBlendPhysics = true;
+		// GetMesh()->WakeAllRigidBodies();
 		GetCharacterMovement()->StopMovementImmediately();
 		GetCharacterMovement()->DisableMovement();
 		GetCharacterMovement()->SetComponentTickEnabled(false);
