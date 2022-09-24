@@ -328,6 +328,7 @@ void AMyProjectCharacter::OnRep_KilledBy()
 	}
 }
 
+// TODO: change instigator to controller
 void AMyProjectCharacter::Die(AActor* InstigatorActor)
 {
 	if (HasAuthority())

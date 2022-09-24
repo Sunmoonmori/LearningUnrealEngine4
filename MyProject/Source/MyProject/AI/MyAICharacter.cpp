@@ -5,6 +5,13 @@
 #include "Perception/PawnSensingComponent.h"
 #include "AIController.h"
 #include "BehaviorTree/BlackboardComponent.h"
+#include "BrainComponent.h"
+#include "Components/CapsuleComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"
+#include "../Character/MyProjectCharacter.h"
+#include "../MyPlayerState.h"
+#include "../MyPlayerController.h"
+#include "Net/UnrealNetwork.h"
 
 // Sets default values
 AMyAICharacter::AMyAICharacter()
@@ -19,6 +26,9 @@ AMyAICharacter::AMyAICharacter()
 	}
 
 	BlackBoardTargetActorKey = "TargetActor";
+
+	MaxHealth = 100.f;
+	Health = MaxHealth;
 }
 
 void AMyAICharacter::PostInitializeComponents()
@@ -42,4 +52,57 @@ void AMyAICharacter::OnPawnSeen(APawn* Pawn)
 			}
 		}
 	}
+}
+
+void AMyAICharacter::OnRep_KilledBy()
+{
+	if (KilledBy)
+	{
+		AAIController* MyController = Cast<AAIController>(GetController());
+		if (MyController)
+		{
+			MyController->GetBrainComponent()->StopLogic("Killed");
+		}
+
+		GetMesh()->SetAllBodiesSimulatePhysics(true);
+		GetMesh()->SetCollisionProfileName("Ragdoll");
+
+		GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		GetCharacterMovement()->DisableMovement();
+
+		SetLifeSpan(5.0f);
+	}
+}
+
+void AMyAICharacter::Die(AController* InstigatorController)
+{
+	if (HasAuthority())
+	{
+		if (!KilledBy) {
+			AMyPlayerController* InstigatorMyPlayerController = Cast<AMyPlayerController>(InstigatorController);
+			if (InstigatorMyPlayerController)
+			{
+				InstigatorMyPlayerController->GetPlayerState<AMyPlayerState>()->AddKill();
+			}
+
+			KilledBy = InstigatorMyPlayerController;
+			OnRep_KilledBy();
+		}
+	}
+	else
+	{
+		ServerDie(InstigatorController);
+	}
+}
+
+void AMyAICharacter::ServerDie_Implementation(AController* InstigatorController)
+{
+	Die(InstigatorController);
+}
+
+void AMyAICharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(AMyAICharacter, KilledBy);
 }

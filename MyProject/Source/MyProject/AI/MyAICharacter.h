@@ -17,6 +17,12 @@ public:
 	// Sets default values for this character's properties
 	AMyAICharacter();
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Attribute)
+	float Health;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Attribute)
+	float MaxHealth;
+
 protected:
 	virtual void PostInitializeComponents() override;
 
@@ -28,4 +34,17 @@ protected:
 
 	UFUNCTION()
 	void OnPawnSeen(APawn* Pawn);
+
+	UPROPERTY(ReplicatedUsing = OnRep_KilledBy)
+	AActor* KilledBy;
+
+	UFUNCTION()
+	void OnRep_KilledBy();
+
+	UFUNCTION(BlueprintCallable)
+	void Die(AController* InstigatorController);
+
+	UFUNCTION(Server, Reliable)
+	void ServerDie(AController* InstigatorController);
+
 };
