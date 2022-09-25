@@ -24,16 +24,19 @@ public:
 	float MaxHealth;
 
 protected:
-	virtual void PostInitializeComponents() override;
+	// NOTE: the final project requires that TargetActor is only according to wheather AI character is attacked by player
+	//       thus we don't need PawnSensingComp anymore
 
-	UPROPERTY(EditDefaultsOnly, Category = AI)
-	FName BlackBoardTargetActorKey;
+	// virtual void PostInitializeComponents() override;
 
-	UPROPERTY(VisibleAnywhere, Category = Components)
-	UPawnSensingComponent* PawnSensingComp;
+	// UPROPERTY(EditDefaultsOnly, Category = AI)
+	// FName BlackBoardTargetActorKey;
 
-	UFUNCTION()
-	void OnPawnSeen(APawn* Pawn);
+	// UPROPERTY(VisibleAnywhere, Category = Components)
+	// UPawnSensingComponent* PawnSensingComp;
+
+	// UFUNCTION()
+	// void OnPawnSeen(APawn* Pawn);
 
 	UPROPERTY(ReplicatedUsing = OnRep_KilledBy)
 	AActor* KilledBy;

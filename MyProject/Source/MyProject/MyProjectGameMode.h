@@ -25,7 +25,7 @@ protected:
 	UPROPERTY()
 	TSubclassOf<ACharacter> TargetNPCClass;
 
-	UPROPERTY()
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = Target)
 	ACharacter* TargetNPC;
 
 	UPROPERTY(EditDefaultsOnly, Category = Target)
@@ -52,7 +52,7 @@ protected:
 	UPROPERTY()
 	TSet<AMyAICharacter*> EnemyAlive;
 
-	UPROPERTY()
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Enemy)
 	int32 MaxEnemyNumber;
 
 	UPROPERTY()

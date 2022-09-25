@@ -12,6 +12,7 @@
 #include "Math/UnrealMathUtility.h"
 #include "EnvironmentQuery/EnvQueryInstanceBlueprintWrapper.h"
 #include "EnvironmentQuery/EnvQueryManager.h"
+#include "BehaviorTree/BlackboardComponent.h"
 
 AMyProjectGameMode::AMyProjectGameMode()
 {
@@ -41,7 +42,7 @@ AMyProjectGameMode::AMyProjectGameMode()
 	GameOverTimeSecond = 60.f;
 
 	EnemySpawnIntervalSecond = 5.0f;
-	MaxEnemyNumber = 5;
+	MaxEnemyNumber = 10;
 	static ConstructorHelpers::FClassFinder<AMyAICharacter> EnemyBPClass_A(TEXT("/Game/AI/Enemy_A/BP_EnemyAICharacter_A"));
 	if (ensure(EnemyBPClass_A.Class != NULL))
 	{
@@ -92,13 +93,13 @@ void AMyProjectGameMode::StartPlay()
 	GetWorldTimerManager().SetTimer(TimerHandle_EnemySpawn, this, &AMyProjectGameMode::SpawnEnemy, EnemySpawnIntervalSecond, true);
 
 	UWorld* World = GetWorld();
-	//if (ensure(World))
-	//{
-	//	FActorSpawnParameters SpawnParams;
-	//	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
-	//
-	//	TargetNPC = World->SpawnActor<AMyAICharacter>(TargetNPCClass, NPCSpawnTransform, SpawnParams);
-	//}
+	if (ensure(World))
+	{
+		FActorSpawnParameters SpawnParams;
+		SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
+
+		TargetNPC = World->SpawnActor<ACharacter>(TargetNPCClass, NPCSpawnTransform, SpawnParams);
+	}
 }
 
 void AMyProjectGameMode::GameOver()
@@ -151,6 +152,7 @@ void AMyProjectGameMode::OnEnemySpawnQueryCompleted(UEnvQueryInstanceBlueprintWr
 			AMyAICharacter* Enemy = World->SpawnActor<AMyAICharacter>(SpawnEnemyClass, Locations[0], Rotation, SpawnParams);
 
 			EnemyController->Possess(Enemy);
+			EnemyController->GetBlackboardComponent()->SetValueAsObject("TargetActor", TargetNPC); // set default attack target
 
 			EnemyAlive.Add(Enemy);
 		}

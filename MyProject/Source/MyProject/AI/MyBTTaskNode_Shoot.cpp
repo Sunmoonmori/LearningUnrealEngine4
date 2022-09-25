@@ -4,7 +4,7 @@
 #include "MyBTTaskNode_Shoot.h"
 #include "AIController.h"
 #include "BehaviorTree/BlackboardComponent.h"
-#include "../Character/MyProjectCharacter.h"
+#include "GameFramework/Character.h"
 
 EBTNodeResult::Type UMyBTTaskNode_Shoot::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
 {
@@ -17,13 +17,8 @@ EBTNodeResult::Type UMyBTTaskNode_Shoot::ExecuteTask(UBehaviorTreeComponent& Own
 			return EBTNodeResult::Failed;
 		}
 
-		AMyProjectCharacter* TargetCharacter = Cast<AMyProjectCharacter>(OwnerComp.GetBlackboardComponent()->GetValueAsObject("TargetActor"));
+		ACharacter* TargetCharacter = Cast<ACharacter>(OwnerComp.GetBlackboardComponent()->GetValueAsObject("TargetActor"));
 		if (TargetCharacter == nullptr)
-		{
-			return EBTNodeResult::Failed;
-		}
-
-		if (TargetCharacter->AttributeComp->GetHitPoint() <= 0.f)
 		{
 			return EBTNodeResult::Failed;
 		}
