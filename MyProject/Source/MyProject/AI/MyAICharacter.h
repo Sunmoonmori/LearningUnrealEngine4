@@ -17,10 +17,10 @@ public:
 	// Sets default values for this character's properties
 	AMyAICharacter();
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Attribute)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Replicated, Category = Attribute)
 	float Health;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Attribute)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Replicated, Category = Attribute)
 	float MaxHealth;
 
 protected:

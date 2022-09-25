@@ -12,6 +12,7 @@
 #include "../MyPlayerState.h"
 #include "../MyPlayerController.h"
 #include "Net/UnrealNetwork.h"
+#include "../MyProjectGameMode.h"
 
 // Sets default values
 AMyAICharacter::AMyAICharacter()
@@ -58,17 +59,12 @@ void AMyAICharacter::OnRep_KilledBy()
 {
 	if (KilledBy)
 	{
-		AAIController* MyController = Cast<AAIController>(GetController());
-		if (MyController)
-		{
-			MyController->GetBrainComponent()->StopLogic("Killed");
-		}
-
 		GetMesh()->SetAllBodiesSimulatePhysics(true);
 		GetMesh()->SetCollisionProfileName("Ragdoll");
 
 		GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 		GetCharacterMovement()->DisableMovement();
+		GetCharacterMovement()->SetComponentTickEnabled(false);
 
 		SetLifeSpan(5.0f);
 	}
@@ -83,6 +79,23 @@ void AMyAICharacter::Die(AController* InstigatorController)
 			if (InstigatorMyPlayerController)
 			{
 				InstigatorMyPlayerController->GetPlayerState<AMyPlayerState>()->AddKill();
+			}
+
+			AAIController* MyController = Cast<AAIController>(GetController());
+			if (MyController)
+			{
+				MyController->GetBrainComponent()->StopLogic("Killed");
+				MyController->Destroy();
+			}
+
+			UWorld* World = GetWorld();
+			if (World)
+			{
+				AMyProjectGameMode* GM = Cast<AMyProjectGameMode>(World->GetAuthGameMode());
+				if (GM)
+				{
+					GM->RemoveEnemyFromRecord(this);
+				}
 			}
 
 			KilledBy = InstigatorMyPlayerController;
@@ -105,4 +118,6 @@ void AMyAICharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLi
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(AMyAICharacter, KilledBy);
+	DOREPLIFETIME(AMyAICharacter, Health);
+	DOREPLIFETIME(AMyAICharacter, MaxHealth);
 }

@@ -6,7 +6,6 @@
 
 AMyGameStateBase::AMyGameStateBase()
 {
-	GameOverTimeSecond = 60.f;
 	bIsGameOver = false;
 }
 

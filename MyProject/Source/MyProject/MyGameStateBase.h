@@ -19,7 +19,8 @@ class MYPROJECT_API AMyGameStateBase : public AGameStateBase
 public:
 	AMyGameStateBase();
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = CountDown)
+	// Don't Set, Will Set by GameMode
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Replicated)
 	float GameOverTimeSecond;
 
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, ReplicatedUsing = OnRep_GameOver, Category = GameOver)
