@@ -25,7 +25,7 @@ protected:
 	UPROPERTY()
 	TSubclassOf<ACharacter> TargetNPCClass;
 
-	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = Target)
+	UPROPERTY()
 	ACharacter* TargetNPC;
 
 	UPROPERTY(EditDefaultsOnly, Category = Target)
@@ -40,6 +40,9 @@ protected:
 	// used to judge win or lose when game over
 	UPROPERTY()
 	bool bIsWin;
+
+	UFUNCTION(BlueprintCallable)
+	void GameOverLoseImmediately();
 
 	UFUNCTION()
 	void GameOver();

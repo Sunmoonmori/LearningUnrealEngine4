@@ -103,10 +103,32 @@ void AMyProjectGameMode::StartPlay()
 	}
 }
 
+void AMyProjectGameMode::GameOverLoseImmediately()
+{
+	bIsWin = false;
+	GetWorldTimerManager().ClearTimer(TimerHandle_GameOver);
+	GameOver();
+}
+
 void AMyProjectGameMode::GameOver()
 {
+	GetWorldTimerManager().ClearTimer(TimerHandle_EnemySpawn);
+	for (const auto e : EnemyAlive)
+	{
+		// XXX: put these in class AMyAIChatacter
+		if (AMyGun* g = e->Gun)
+		{
+			g->Destroy();
+		}
+		if (AController* c = e->GetController())
+		{
+			c->Destroy();
+		}
+		e->Destroy();
+	}
+
 	AMyGameStateBase* GS = Cast<AMyGameStateBase>(GameState);
-	if (GS)
+	if (ensure(GS))
 	{
 		if (bIsWin)
 		{
@@ -119,6 +141,7 @@ void AMyProjectGameMode::GameOver()
 			GS->OnRep_GameOverLose();
 		}
 	}
+	
 }
 
 void AMyProjectGameMode::SpawnEnemy()
