@@ -35,6 +35,8 @@ AMyAICharacter::AMyAICharacter()
 
 void AMyAICharacter::BeginPlay()
 {
+	Super::BeginPlay();
+
 	if (HasAuthority())
 	{
 		FTransform GunTransform = GetMesh()->GetSocketTransform(TEXT("RifleHoldSocket"));
@@ -121,9 +123,12 @@ void AMyAICharacter::Die(AController* InstigatorController)
 				}
 			}
 
-			Gun->DetachFromActor(FDetachmentTransformRules(EDetachmentRule::KeepWorld, false));
-			Gun->OnGunDropped();
-			Gun = nullptr;
+			if (Gun)
+			{
+				Gun->DetachFromActor(FDetachmentTransformRules(EDetachmentRule::KeepWorld, false));
+				Gun->OnGunDropped();
+				Gun = nullptr;
+			}
 
 			KilledBy = InstigatorMyPlayerController;
 			OnRep_KilledBy();
