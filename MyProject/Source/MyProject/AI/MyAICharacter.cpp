@@ -13,6 +13,7 @@
 #include "../MyPlayerController.h"
 #include "Net/UnrealNetwork.h"
 #include "../MyProjectGameMode.h"
+#include "../Weapon/MyGun.h"
 
 // Sets default values
 AMyAICharacter::AMyAICharacter()
@@ -30,6 +31,22 @@ AMyAICharacter::AMyAICharacter()
 
 	MaxHealth = 100.f;
 	Health = MaxHealth;
+}
+
+void AMyAICharacter::BeginPlay()
+{
+	if (HasAuthority())
+	{
+		FTransform GunTransform = GetMesh()->GetSocketTransform(TEXT("RifleHoldSocket"));
+		FActorSpawnParameters Params;
+		Params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+		Gun = GetWorld()->SpawnActor<AMyGun>(GunClass, GunTransform, Params);
+		if (Gun)
+		{
+			Gun->OnGunPickedUp();
+			Gun->AttachToComponent(GetMesh(), FAttachmentTransformRules(EAttachmentRule::SnapToTarget, true), TEXT("RifleHoldSocket"));
+		}
+	}
 }
 
 // void AMyAICharacter::PostInitializeComponents()
@@ -103,6 +120,10 @@ void AMyAICharacter::Die(AController* InstigatorController)
 					GM->RemoveEnemyFromRecord(this);
 				}
 			}
+
+			Gun->DetachFromActor(FDetachmentTransformRules(EDetachmentRule::KeepWorld, false));
+			Gun->OnGunDropped();
+			Gun = nullptr;
 
 			KilledBy = InstigatorMyPlayerController;
 			OnRep_KilledBy();

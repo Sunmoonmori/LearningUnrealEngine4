@@ -23,6 +23,8 @@ EBTNodeResult::Type UMyBTTaskNode_Shoot::ExecuteTask(UBehaviorTreeComponent& Own
 			return EBTNodeResult::Failed;
 		}
 
+		// we do not use Gun's Fire function since it's for players
+		// we directly generate projectile, and the projectile is also only for AI rather than players
 		FVector MuzzleLocation = MyPawn->GetMesh()->GetSocketLocation("Muzzle_tmp");
 		FVector Direction = TargetCharacter->GetActorLocation() - MuzzleLocation;
 		FRotator MuzzleRotation = Direction.Rotation();

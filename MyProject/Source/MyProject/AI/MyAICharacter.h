@@ -7,6 +7,7 @@
 #include "MyAICharacter.generated.h"
 
 class UPawnSensingComponent;
+class AMyGun;
 
 UCLASS()
 class MYPROJECT_API AMyAICharacter : public ACharacter
@@ -17,14 +18,22 @@ public:
 	// Sets default values for this character's properties
 	AMyAICharacter();
 
+	virtual void BeginPlay() override;
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Replicated, Category = Attribute)
 	float Health;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Replicated, Category = Attribute)
 	float MaxHealth;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Gun)
+	TSubclassOf<AMyGun> GunClass;
+
+	UPROPERTY()
+	AMyGun* Gun;
+
 protected:
-	// NOTE: the final project requires that TargetActor is only according to wheather AI character is attacked by player
+	// NOTE: the final project requires that TargetActor is only according to wheather AI character is attacked by player or not
 	//       thus we don't need PawnSensingComp anymore
 
 	// virtual void PostInitializeComponents() override;

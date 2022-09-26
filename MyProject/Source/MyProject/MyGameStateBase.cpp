@@ -6,17 +6,24 @@
 
 AMyGameStateBase::AMyGameStateBase()
 {
-	bIsGameOver = false;
+	bIsGameOverLose = false;
+	bIsGameOverWin = false;
 }
 
-void AMyGameStateBase::OnRep_GameOver()
+void AMyGameStateBase::OnRep_GameOverWin()
 {
-	OnGameOver.Broadcast();
+	OnGameOverWin.Broadcast();
+}
+
+void AMyGameStateBase::OnRep_GameOverLose()
+{
+	OnGameOverLose .Broadcast();
 }
 
 void AMyGameStateBase::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
-	DOREPLIFETIME(AMyGameStateBase, bIsGameOver);
+	DOREPLIFETIME(AMyGameStateBase, bIsGameOverWin);
+	DOREPLIFETIME(AMyGameStateBase, bIsGameOverLose);
 }

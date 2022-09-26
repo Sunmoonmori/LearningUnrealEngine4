@@ -37,6 +37,10 @@ protected:
 	UPROPERTY()
 	FTimerHandle TimerHandle_GameOver;
 
+	// used to judge win or lose when game over
+	UPROPERTY()
+	bool bIsWin;
+
 	UFUNCTION()
 	void GameOver();
 

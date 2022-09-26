@@ -39,6 +39,7 @@ AMyProjectGameMode::AMyProjectGameMode()
 		TargetNPCClass = TargetNPCBPClass.Class;
 	}
 
+	bIsWin = true;
 	GameOverTimeSecond = 60.f;
 
 	EnemySpawnIntervalSecond = 5.0f;
@@ -107,8 +108,16 @@ void AMyProjectGameMode::GameOver()
 	AMyGameStateBase* GS = Cast<AMyGameStateBase>(GameState);
 	if (GS)
 	{
-		GS->bIsGameOver = true;
-		GS->OnRep_GameOver();
+		if (bIsWin)
+		{
+			GS->bIsGameOverWin = true;
+			GS->OnRep_GameOverWin();
+		}
+		else
+		{
+			GS->bIsGameOverLose = true;
+			GS->OnRep_GameOverLose();
+		}
 	}
 }
 
