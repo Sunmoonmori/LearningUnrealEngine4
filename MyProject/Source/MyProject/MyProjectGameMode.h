@@ -73,6 +73,9 @@ protected:
 
 	UFUNCTION()
 	void OnEnemySpawnQueryCompleted(UEnvQueryInstanceBlueprintWrapper* QueryInstance, EEnvQueryStatus::Type QueryStatus);
+	
+	UFUNCTION()
+	void ClearEnemy();
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = SaveGame)
 	FString DefaultSlotName;
