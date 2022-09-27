@@ -29,8 +29,11 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Gun)
 	TSubclassOf<AMyGun> GunClass;
 
-	UPROPERTY()
+	UPROPERTY(ReplicatedUsing = OnRep_AttachGun)
 	AMyGun* Gun;
+
+	UFUNCTION()
+	void OnRep_AttachGun();
 
 protected:
 	// NOTE: the final project requires that TargetActor is only according to wheather AI character is attacked by player or not

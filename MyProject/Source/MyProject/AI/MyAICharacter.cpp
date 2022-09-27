@@ -43,11 +43,16 @@ void AMyAICharacter::BeginPlay()
 		FActorSpawnParameters Params;
 		Params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 		Gun = GetWorld()->SpawnActor<AMyGun>(GunClass, GunTransform, Params);
-		if (Gun)
-		{
-			Gun->OnGunPickedUp();
-			Gun->AttachToComponent(GetMesh(), FAttachmentTransformRules(EAttachmentRule::SnapToTarget, true), TEXT("RifleHoldSocket"));
-		}
+		OnRep_AttachGun();
+	}
+}
+
+void AMyAICharacter::OnRep_AttachGun()
+{
+	if (Gun)
+	{
+		Gun->OnGunPickedUp();
+		Gun->AttachToComponent(GetMesh(), FAttachmentTransformRules(EAttachmentRule::SnapToTarget, true), TEXT("RifleHoldSocket"));
 	}
 }
 
@@ -84,10 +89,17 @@ void AMyAICharacter::OnRep_KilledBy()
 {
 	if (KilledBy)
 	{
+		GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+		if (Gun)
+		{
+			Gun->DetachFromActor(FDetachmentTransformRules(EDetachmentRule::KeepWorld, false));
+			Gun->OnGunDropped();
+		}
+
 		GetMesh()->SetAllBodiesSimulatePhysics(true);
 		GetMesh()->SetCollisionProfileName("Ragdoll");
 
-		GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 		GetCharacterMovement()->DisableMovement();
 		GetCharacterMovement()->SetComponentTickEnabled(false);
 
@@ -123,13 +135,6 @@ void AMyAICharacter::Die(AController* InstigatorController)
 				}
 			}
 
-			if (Gun)
-			{
-				Gun->DetachFromActor(FDetachmentTransformRules(EDetachmentRule::KeepWorld, false));
-				Gun->OnGunDropped();
-				Gun = nullptr;
-			}
-
 			KilledBy = InstigatorMyPlayerController;
 			OnRep_KilledBy();
 		}
@@ -149,6 +154,7 @@ void AMyAICharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLi
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
+	DOREPLIFETIME(AMyAICharacter, Gun);
 	DOREPLIFETIME(AMyAICharacter, KilledBy);
 	DOREPLIFETIME(AMyAICharacter, Health);
 	DOREPLIFETIME(AMyAICharacter, MaxHealth);
