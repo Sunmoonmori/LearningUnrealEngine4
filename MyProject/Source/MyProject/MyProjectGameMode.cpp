@@ -90,6 +90,11 @@ void AMyProjectGameMode::StartPlay()
 {
 	Super::StartPlay();
 
+	if (UGameplayStatics::GetCurrentLevelName(GetWorld()) != "ThirdPersonExampleMap")
+	{
+		return;
+	}
+
 	GetWorldTimerManager().SetTimer(TimerHandle_GameOver, this, &AMyProjectGameMode::GameOver, GameOverTimeSecond, false);
 	GetWorldTimerManager().SetTimer(TimerHandle_EnemySpawn, this, &AMyProjectGameMode::SpawnEnemy, EnemySpawnIntervalSecond, true);
 
